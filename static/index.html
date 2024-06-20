@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pl-PL">
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" type="text/css" href="./css/style.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Ściąganie zdjęć</title>
+        <!-- <script type="module" src="node_modules/basic-ftp/dist/index.js"></script> -->
+    </head>
+    <body>
+        <widok_strony>
+            <div id="pasek">
+                <o_serwerze>
+                    <img id="status" src="./img/status.svg" alt="status połączenia">
+                    Adres Serwera&nbsp:&nbsp<adres>127.0.0.1</adres>
+                    &nbsp
+                    <span style="color: grey;">
+                        (połącz się z 1 wspólną siecią na 2. sprzęcie i wejdź w ten adres)
+                    </span>
+                </o_serwerze>
+                <przestrzen_wolna_w_pasku></przestrzen_wolna_w_pasku>
+                <!-- <button blank id="przyciskqr" onclick="qr()"> -->
+                <!--     <img src="./img/qrREAL.svg" alt="wyświetl kod qr"> -->
+                <!-- </button> -->
+                <button blank id="sciagnij">
+                    <img src="./img/sciagnij.svg" alt="ściągnij zdjęcia">
+                </button>
+                <button blank id="dodaj">
+                    <img src="./img/plus.svg" alt="dodaj">
+                </button>
+            </div>
+
+            <main>
+                <ja>
+                    <div>
+                        Ty (id: x)
+                    </div>
+                    <div>
+                        <button blank class="dodaj">
+                            <img src="./img/plus.svg">
+                            wstaw nowe
+                        </button>
+                    </div>
+                </ja>
+                <ty>
+                    <div>
+                        Inne Urządzenie
+                    </div>
+                    <div>
+                        
+                    </div>
+                </ty>
+            </main>
+        </widok_strony>
+        <kodqr style="display: none;">
+            <img src="./img/qrREAL.svg">
+        </kodqr>
+        <!-- <script type="text/js" src="./js/qr.js"></script> -->
+        <script src="./js/main.js"></script>
+    </body>
+</html>
