@@ -49,20 +49,20 @@ class sender {
     }
 
     static genFIlesFromB64(files) {
-        let newFiles = files.map( (fob) => {
+        let newFiles = files.map((fob) => {
             let datastr = fob.data
             datastr = datastr.split(",")[1]
             let bytestr = atob(datastr)
             let bytenums = new Array(bytestr.length)
-            for (let i = 0; i < bytestr.length; i++){
+            for (let i = 0; i < bytestr.length; i++) {
                 bytenums[i] = bytestr.charCodeAt(i)
             }
             let bytes = new Uint8Array(bytenums)
-            let blob = new Blob([bytes], { type: fob.ft})
-            let file = new File([blob], fob.name, {type: fob.ft})
+            let blob = new Blob([bytes], { type: fob.ft })
+            let file = new File([blob], fob.name, { type: fob.ft })
 
-            return {id: fob.id, file: file}
-        } )
+            return { id: fob.id, file: file }
+        })
         return newFiles
     }
 
@@ -108,13 +108,19 @@ class sender {
 
 
 function usun(id) {
-    ja_grid.querySelectorAll("button[iid]").values().find((e) => { return e.getAttribute("iid") == id }).remove()
+    // let rm_element = 0;
+    for (el of ja_grid.querySelectorAll("button[iid]").values()) {
+        if (el.getAttribute("iid") == id) {
+            el.remove();
+            break;
+        }
+    }
     sock.send(JSON.stringify({
         type: 1,
         nr: nr,
         ids: [{
             id: id,
-            name: files.find( (e) => { return e.id == id } ).file.name,
+            name: files.find((e) => { return e.id == id }).file.name,
         }]
     }))
     files.splice(id, 1)
@@ -134,16 +140,16 @@ sock.onmessage = (e) => {
         }
         case (2137): {
             fetch("/givfilesplz",
-            
+
                 {
                     method: 'POST',
                     responseType: 'text', // Explicitly set the responseType to 'text'
                     body:
                         // JSON.stringify({
-                            // type: 0,
-                            nr,
-                            // files: resolvedFiles
-                        // }),
+                        // type: 0,
+                        nr,
+                    // files: resolvedFiles
+                    // }),
                     headers: {
                         'Content-Type': 'text/plain'
                     },
@@ -163,14 +169,19 @@ sock.onmessage = (e) => {
                 opfiles = opfiles.concat(newFiles)
                 dodaj_karty(newFiles, ty_grid, false)
             }).catch(error => {
-                    console.error('fetch was wrong: ', error);
+                console.error('fetch was wrong: ', error);
             });
             break;
         }
-        case(1): {
+        case (1): {
             for (karta of msg.ids) {
-                ty_grid.querySelectorAll("button[iid]").values().find((e) => { return e.getAttribute("iid") == karta.id }).remove()
                 opfiles.splice(karta.id, 1)
+                for (el of ty_grid.querySelectorAll("button[iid]").values()) {
+                    if (el.getAttribute("iid") == karta.id) {
+                        el.remove();
+                        break;
+                    }
+                }
             }
             break;
         }
@@ -203,7 +214,7 @@ function dodaj_karty(newfiles, gridbox, usuwalne) {
         karta.innerHTML = `
             <img src="${file.file.type.substring(0, 5) === "image" ? URL.createObjectURL(file.file) : "./img/plik.svg"}" alt="${file.file.name}">
             ${file.file.name}
-            ${usuwalne ? '<button class="del">x</button>': ''}
+            ${usuwalne ? '<button class="del">x</button>' : ''}
         `
         // const eid = _id //a to tak w razie czego jeśli _id jako argument dla funkcji by miał się zmienić
         // karta.onclick = () => {usun(eid)}

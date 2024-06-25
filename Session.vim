@@ -13,14 +13,16 @@ if &shortmess =~ 'A'
 else
   set shortmess=aoO
 endif
-badd +49 ~/Documents/go_zdjecia/main.go
-badd +46 ~/Documents/go_zdjecia/webs/webs.go
-badd +110 ./static/js/main.js
+badd +52 ~/Documents/go_zdjecia/main.go
+badd +94 ~/Documents/go_zdjecia/webs/webs.go
+badd +111 ./static/js/main.js
+badd +1 ~/Documents/go_zdjecia/.gitignore
+badd +0 neo-tree\ filesystem\ \[1]
 argglobal
 %argdel
-edit ~/Documents/go_zdjecia/webs/webs.go
+edit ./static/js/main.js
 argglobal
-balt ./static/js/main.js
+balt ~/Documents/go_zdjecia/webs/webs.go
 setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -31,12 +33,12 @@ setlocal fdn=20
 setlocal fen
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 46 - ((20 * winheight(0) + 28) / 56)
+let s:l = 111 - ((24 * winheight(0) + 28) / 56)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 46
-normal! 0
+keepjumps 111
+normal! 0109|
 tabnext 1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf
@@ -50,7 +52,6 @@ if filereadable(s:sx)
 endif
 let &g:so = s:so_save | let &g:siso = s:siso_save
 set hlsearch
-nohlsearch
 doautoall SessionLoadPost
 unlet SessionLoad
 " vim: set ft=vim :
