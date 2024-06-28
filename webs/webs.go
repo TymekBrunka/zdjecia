@@ -15,10 +15,12 @@ import (
 	"fmt"
 	// "fmt"
 	"errors"
-	"log"
-    "strconv"
 	"golang.org/x/net/websocket"
+	"log"
+	"strconv"
 	// "golang.org/x/tools/go/analysis/passes/defers"
+	// "io/fs"
+	"path/filepath"
 )
 
 type Img struct {
@@ -61,6 +63,9 @@ func HandleWebsocket(ws *websocket.Conn) {
 			wsmsgerr := websocket.Message.Receive(ws, &msg)
 			if wsmsgerr != nil {
 				log.Printf("Error receiving websocket message: %s", wsmsgerr)
+				Next_id = bruh(Connections[0] == ws, 0, 1).(int)
+				Connections[Next_id] = nil
+				ConLen--
 				break
 			}
 
@@ -84,22 +89,66 @@ func HandleWebsocket(ws *websocket.Conn) {
 				log.Printf(".,decoded json message with data: \x1b[32mtype: %d, ids: %x\x1b[0m\n", data.Type, data.Img_ids)
 
 				if data.Type == 69 {
-					newmsg := fmt.Sprintf("{\"type\" : 69420, \"id\": %d}", the_id)
-					log.Printf(".,.,sending: \x1b[35m%s\x1b[0m\n", newmsg)
+					newmsg := fmt.Sprintf("{\"type\" : 69420, \"id\": %d, \"data\" : [ {\"nr\" : 0, \"files\" : [ ", the_id)
 
-					err := websocket.Message.Send(ws, newmsg)
+					files, err := os.ReadDir("./zasoby_serwera/u_0/")
+					if err != nil {
+						log.Printf("\x1b[31mcouldnt list directory \x1b[32mu_0\x1b[31m with error %s\x1b[0m\n", err)
+					}
+
+					for _, file := range files {
+						splited := strings.Split(file.Name(), ";")
+						splited[1] = strings.Replace(splited[1], "&", "/", 1)
+						filePath := filepath.Join("./zasoby_serwera/u_0/", file.Name())
+						newmsg = fmt.Sprintf(`%s{
+                            "id"   : %s,
+                            "ft"   : "%s",
+                            "name" : "%s",
+                            "data" : "data:%s;base64,%s"},`,
+							newmsg, splited[0], splited[1], splited[2], splited[1], base64.RawStdEncoding.EncodeToString(read_file(filePath)))
+					}
+
+					newmsg = fmt.Sprintf("%s ] }, { \"nr\" : 1, \"files\": [ ", newmsg[:len(newmsg)-1])
+
+					files, err = os.ReadDir("./zasoby_serwera/u_1/")
+					if err != nil {
+						log.Printf("\x1b[31mcouldnt list directory \x1b[32mu_1\x1b[31m with error %s\x1b[0m\n", err)
+					}
+
+					for _, file := range files {
+						splited := strings.Split(file.Name(), ";")
+						splited[1] = strings.Replace(splited[1], "&", "/", 1)
+						filePath := filepath.Join("./zasoby_serwera/u_1/", file.Name())
+						if err != nil {
+							fmt.Println("Error opening file:", err)
+							continue
+						}
+
+						newmsg = fmt.Sprintf(`%s{
+                            "id"   : %s,
+                            "ft"   : "%s",
+                            "name" : "%s",
+                            "data" : "data:%s;base64,%s"},`,
+							newmsg, splited[0], splited[1], splited[2], splited[1], base64.RawStdEncoding.EncodeToString(read_file(filePath)))
+					}
+
+					newmsg = fmt.Sprintf("%s ] } ] }", newmsg[:len(newmsg)-1])
+
+					// log.Printf(".,.,sending: \x1b[35m%s\x1b[0m\n", newmsg)
+
+					err = websocket.Message.Send(ws, newmsg)
 					if err != nil {
 						log.Printf("\x1b[31mError sending websocket message: %s\x1b[0m", err)
 						break
 					}
 				} else if data.Type == 1 {
 					websocket.Message.Send(Connections[(data.Sender+1)%2], msg)
-                    for _, file := range data.Img_ids {
-                        err := remove_file(file.Id, data.Sender)
-                        if (err != nil) {
-                            log.Printf("\x1b[31mcouldnt remove file with id\x1b[32m%d\x1b[31m with error %s\x1b[0m\n", file.Id, err)
-                        }
-                    }
+					for _, file := range data.Img_ids {
+						err := remove_file(file.Id, data.Sender)
+						if err != nil {
+							log.Printf("\x1b[31mcouldnt remove file with id\x1b[32m%d\x1b[31m with error %s\x1b[0m\n", file.Id, err)
+						}
+					}
 				}
 			}
 
@@ -165,25 +214,51 @@ func save_file(file Img, content []byte, sender int) error {
 func remove_file(id int, sender int) error {
 	folder := bruh(sender == 0, "u_0", "u_1").(string)
 	thepath := fmt.Sprintf("./zasoby_serwera/%s/", folder)
-    files, err := os.ReadDir(thepath)
-    if (err != nil) {
-        // log.Printf("\x1b[31mcouldnt list directory \x1b[32m%s\x1b[31m with error %s\x1b[0m\n", folder, err)
-        return err
-    }
+	files, err := os.ReadDir(thepath)
+	if err != nil {
+		// log.Printf("\x1b[31mcouldnt list directory \x1b[32m%s\x1b[31m with error %s\x1b[0m\n", folder, err)
+		return err
+	}
 
-    for _, file := range files {
-        id_as_string := strconv.Itoa(id)
-        if (strings.Split(file.Name(), ";")[0] == id_as_string ) {
-            log.Printf(".,.,removing file \x1b[32m%s%s\x1b[0m\n", thepath, file.Name())
-            err = os.Remove(fmt.Sprintf("%s%s", thepath, file.Name()))
-            if (err != nil) {
-                // log.Printf("\x1b[31mcouldnt remove file \x1b[32m%s\x1b[31m with error %s\x1b[0m\n", fmt.Sprintf("%s%s", thepath, file.Name()), err)
-                return err
-            }
-        }
-    }
+	for _, file := range files {
+		id_as_string := strconv.Itoa(id)
+		if strings.Split(file.Name(), ";")[0] == id_as_string {
+			log.Printf(".,.,removing file \x1b[32m%s%s\x1b[0m\n", thepath, file.Name())
+			err = os.Remove(fmt.Sprintf("%s%s", thepath, file.Name()))
+			if err != nil {
+				// log.Printf("\x1b[31mcouldnt remove file \x1b[32m%s\x1b[31m with error %s\x1b[0m\n", fmt.Sprintf("%s%s", thepath, file.Name()), err)
+				return err
+			}
+		}
+	}
 	// log.Printf("removing file :\x1b[32m%s\x1b[0m\n", filename)
 	return nil
+}
+
+func read_file(p string) []byte {
+	file, err := os.Open(p)
+	if err != nil {
+		fmt.Println("Error opening file:", err)
+		return nil
+	}
+	defer file.Close()
+
+	// Get the file size
+	fileInfo, err := file.Stat()
+	if err != nil {
+		fmt.Println("Error getting file information:", err)
+		return nil
+	}
+	fileSize := fileInfo.Size()
+
+	// Read the file content into a byte slice
+	data := make([]byte, fileSize)
+	_, err = file.Read(data)
+	if err != nil {
+		fmt.Println("Error reading file:", err)
+		return nil
+	}
+    return data
 }
 
 func SendFilesToClient(w http.ResponseWriter, r *http.Request) {
@@ -195,7 +270,7 @@ func SendFilesToClient(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("\x1b[31m(sftc)failed to parse json request with error: %s\x1b[0m\n", err)
 	} else {
-        // log.Printf("(sftc)decoded json message with data: \x1b[32msender: %d, files: %x\x1b[0m\n", msg.Sender, msg.Files)
+		// log.Printf("(sftc)decoded json message with data: \x1b[32msender: %d, files: %x\x1b[0m\n", msg.Sender, msg.Files)
 		for _, file := range msg.Files {
 			filedata, err := decode_img_data(file.Data)
 			if err != nil {

@@ -66,6 +66,17 @@ class sender {
         return newFiles
     }
 
+    static downloadFile(file) {
+        const blob = new Blob([file], { type: file.type });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = file.name;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+    }
+
     static async sendImg(files) {
         const newFiles = files.map(async (e) => {
             const fileData = await this.readFileAsDataURL(e.file);
@@ -136,6 +147,15 @@ sock.onmessage = (e) => {
     switch (msg.type) {
         case (69420): {
             nr = msg.id
+
+            newFiles = sender.genFIlesFromB64(msg.data[nr == 0 ? 0 : 1].files)
+            files = files.concat(newFiles)
+            dodaj_karty(newFiles, ja_grid, false)
+
+            newFiles = sender.genFIlesFromB64(msg.data[nr == 0 ? 1 : 0].files)
+            opfiles = opfiles.concat(newFiles)
+            dodaj_karty(newFiles, ty_grid, false)
+
             break;
         }
         case (2137): {
@@ -233,5 +253,11 @@ fs_menu.onchange = async (e) => {
     sender.sendImg(newFiles)
     dodaj_karty(newFiles, ja_grid, true)
     // sender.sendImg(newFiles)
+}
+
+document.getElementById("sciagnij").onclick = () => {
+    for (file of opfiles) {
+        sender.downloadFile(file.file)
+    }
 }
 
