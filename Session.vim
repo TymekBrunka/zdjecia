@@ -14,13 +14,15 @@ else
   set shortmess=aoO
 endif
 badd +64 main.go
-badd +126 webs/webs.go
-badd +91 static/js/main.js
+badd +49 webs/webs.go
+badd +229 static/js/main.js
+badd +252 ~/Documents/go_zdjecia/static/css/style.css
+badd +52 ~/Documents/go_zdjecia/static/index.html
 argglobal
 %argdel
 edit static/js/main.js
 argglobal
-balt webs/webs.go
+balt ~/Documents/go_zdjecia/static/index.html
 setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -31,12 +33,12 @@ setlocal fdn=20
 setlocal fen
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 91 - ((55 * winheight(0) + 28) / 56)
+let s:l = 229 - ((26 * winheight(0) + 28) / 56)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 91
-normal! 025|
+keepjumps 229
+normal! 066|
 tabnext 1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf

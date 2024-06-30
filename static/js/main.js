@@ -220,14 +220,51 @@ fs_menu.type = "file"
 fs_menu.multiple = true
 ja_grid = document.querySelector("ja > div:nth-child(2)")
 ty_grid = document.querySelector("ty > div:nth-child(2)")
+printus = document.querySelector("printus")
 
 document.querySelector(".dodaj").onclick = () => {
     fs_menu.click()
 }
 
+function zaznacz(id) {
+    const len = printus.children.length
+    for (let i = 0; i < len; i++){console.log(len); console.log(printus.children); printus.children[0].remove(); console.log("removos");}
+    var imageDimensions = [];
+    for (el of ty_grid.querySelectorAll("button[iid]").values()) {
+        if (el.getAttribute("iid") == id) {
+            el.setAttribute("zaznacz", el.getAttribute("zaznacz") == 1 ? 0 : 1)
+            el.classList.toggle("sel")
+            // break;
+        }
+        if (el.getAttribute("zaznacz") == 1) {
+            image = el.querySelector("img")
+            imageDimensions.push([image.naturalWidth, image.naturalHeight, el]);
+        }
+    }
+    imageDimensions.sort(function (a, b) {
+        if (a[0] - b[0] === 0) {
+            return a[1] - b[1];
+        }
+        return a[0] - b[0];     
+    });
+
+    console.log(imageDimensions)
+    for (l of imageDimensions){
+        el = l[2]
+        eg = document.createElement("div")
+        eg.style.display = "inline-block"
+        eg.innerHTML = `
+            <!-- <p style="font-size: min(10vw, 10vh);">${el.innerText}</p> -->
+            <img class="primg" src="${el.querySelector('img').src}">
+        `
+        printus.appendChild(eg)
+        console.log("appendus")
+    }
+}
+
 function dodaj_karty(newfiles, gridbox, usuwalne) {
 
-    for (file of newFiles) {
+    for (file of newfiles) {
         karta = document.createElement("button")
         karta.className = "karta"
         karta.setAttribute("iid", file.id)
@@ -239,11 +276,12 @@ function dodaj_karty(newfiles, gridbox, usuwalne) {
         // const eid = _id //a to tak w razie czego jeśli _id jako argument dla funkcji by miał się zmienić
         // karta.onclick = () => {usun(eid)}
         if (usuwalne) { karta.setAttribute("onclick", `usun(${file.id})`); }
+        else { karta.setAttribute("onclick", `zaznacz(${file.id})`); karta.setAttribute("zaznacz", 0); }
         gridbox.appendChild(karta)
     }
 }
 
-fs_menu.onchange = async (e) => {
+fs_menu.onchange = () => {
     // console.log(e)
     i = 0;
     newFiles = Array.prototype.slice.call(fs_menu.files).map((e) => { return { id: -1, file: e }; })
@@ -252,7 +290,6 @@ fs_menu.onchange = async (e) => {
     console.log(newFiles)
     sender.sendImg(newFiles)
     dodaj_karty(newFiles, ja_grid, true)
-    // sender.sendImg(newFiles)
 }
 
 document.getElementById("sciagnij").onclick = () => {
